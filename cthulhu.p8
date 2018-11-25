@@ -121,6 +121,8 @@ countdialogs=0
 countcth=0
 cthstatus=0
 cthslctopt=1
+ctrformusic=1
+
 -->8
 --loop start here
 function _init()
@@ -146,6 +148,7 @@ function _draw()
  	drawsymbols()
  	herostatus()
  	selecthero()
+ 	movecthulhu()
  	spr(pc.sprite,pc.x,pc.y)
   initialdialogs()
   options()
@@ -153,7 +156,6 @@ function _draw()
   optionscth()
   clickmenucth()
   countturn()
-  movecthulhu()
   movehero()
 	end	
 end
@@ -334,7 +336,6 @@ function optionscth()
  			 if menusel.y>96 then menusel.y=96 end
  			end
  		end
- 		stay=false
  	end
  end
 end
@@ -373,6 +374,32 @@ end
 
 function clickmenucth()
 	if cthrises then
+ 	if menucthchoice then
+ 		if btnp(5) then
+ 			play=true
+ 			optmenu=false		
+  		selopt=1
+  		menusel.y=72
+  		countrei=0
+  		gamestatus="inicio"
+  		stay=false
+  	elseif btnp(4) then
+  		if selopt==2 then
+  			play=true
+   		optmenu=false		
+   		selopt=1
+   		menusel.y=72
+   		countrei=0
+   		gamestatus="inicio"
+   		stay=false
+   	elseif selopt==1 then
+   		play=true
+   		gamestatus="lutar"
+   		stay=false
+   	end
+ 		end
+ 		menucthchoice=false
+ 	end
 	end
 end
 
@@ -380,15 +407,82 @@ function countturn()
 	print("turno: "..tostr(currentturn),92,122,0)
 end
 
-function movecthulhu()
-	if currentturn>3 and not cthenters then
-		local n=rnd(2)
-		if n>1 then
-			cthrises=true
-			cthmove=true
-			cthenters=true
+function drawcthulhu()
+	spr(34,cth.sp1x,cth.sp1y)
+	spr(35,cth.sp2x,cth.sp2y)
+	spr(50,cth.sp3x,cth.sp3y)
+	spr(51,cth.sp4x,cth.sp4y)
+end
+
+function herostatus()
+	for i=0,hero.life-1 do
+		spr(25,hero.lifex+(i*8),hero.lifey)
+	end
+	for i=0,hero.attack-1 do
+		spr(24,hero.attackx+(i*8),hero.attacky)
+	end
+	for i=0,hero.defense-1 do
+			spr(23,hero.defensex+(i*8),hero.defensey)
+	end
+end
+-->8
+--move functions
+function movehero()
+	if btnp(4) then
+		if gamestatus=="reino" then
+			gamestatus="inicio" 		
+ 	 countrei+=1
+ 		if countrei%2==0 then
+ 			hero.x=100
+ 			hero.y=25
+ 			currentturn+=1
+ 			risecth()
+  		optmenu=false		
+  		selopt=1
+  		menusel.y=72
+  		countrei=0
+  		if not burnrei then
+  			hero.attack+=1
+  		end
+  		if hero.attack>10 then hero.attack=10 end
+  		gamestatus="inicio"
+  		if cthrises then cthmove=true end
+ 		end		
+ 	elseif gamestatus=="vila" then
+ 		currentturn+=1
+ 		risecth()
+ 		hero.x=40
+ 		hero.y=72 		
+ 		optmenu=false		
+ 		selopt=1
+ 		menusel.y=72
+ 		countrei=0
+ 		if not burnvil then
+ 			hero.life+=1
+ 		end
+ 		if hero.life>10 then hero.life=10 end
+ 		gamestatus="inicio"
+ 		if cthrises then cthmove=true end
+ 	elseif gamestatus=="tenda" then
+			currentturn+=1
+			risecth()
+			hero.x=16
+			hero.y=104
+			optmenu=false		
+ 		selopt=1
+ 		menusel.y=72
+ 		countrei=0
+ 		if not burnten then
+ 			hero.defense+=1
+ 		end
+ 		if hero.defense>10 then hero.defense=10 end
+ 		gamestatus="inicio"
+ 		if cthrises then cthmove=true end
 		end
 	end
+end
+
+function movecthulhu()
 	if cthrises then
 		if cthmove then
 			local n=rnd(3)
@@ -438,91 +532,32 @@ function movecthulhu()
 	end
 end
 
-function drawcthulhu()
-	spr(34,cth.sp1x,cth.sp1y)
-	spr(35,cth.sp2x,cth.sp2y)
-	spr(50,cth.sp3x,cth.sp3y)
-	spr(51,cth.sp4x,cth.sp4y)
+function risecth ()
+	if currentturn>3 and not cthenters then
+		local n=rnd(3)
+		print(n,30,30)
+		if n<1 then
+			cthrises=true
+			cthmove=true
+			cthenters=true
+		end
+	end
+end
+-->8
+--music and sound
+function checkmenusound()
+	if play then sfx(0) end
+	play=false
 end
 
 function cthulhumusic()
 	if cthrises then
 		if not cthmusic then
-		music(0)
-		cthmusic=true
+		sfx(6)
+ 	music(0)
+ 	cthmusic=true
 		end
 	end
-end
-
-function herostatus()
-	for i=0,hero.life-1 do
-		spr(25,hero.lifex+(i*8),hero.lifey)
-	end
-	for i=0,hero.attack-1 do
-		spr(24,hero.attackx+(i*8),hero.attacky)
-	end
-	for i=0,hero.defense-1 do
-			spr(23,hero.defensex+(i*8),hero.defensey)
-	end
-end
--->8
---move functions
-function movehero()
-	if btnp(4) then
-		if gamestatus=="reino" then
-			gamestatus="inicio" 		
- 	 countrei+=1
- 		if countrei%2==0 then
- 			hero.x=100
- 			hero.y=25
- 			currentturn+=1
-  		optmenu=false		
-  		selopt=1
-  		menusel.y=72
-  		countrei=0
-  		if not burnrei then
-  			hero.attack+=1
-  		end
-  		if hero.attack>10 then hero.attack=10 end
-  		gamestatus="inicio"
-  		if cthrises then cthmove=true end
- 		end		
- 	elseif gamestatus=="vila" then
- 		currentturn+=1
- 		hero.x=40
- 		hero.y=72 		
- 		optmenu=false		
- 		selopt=1
- 		menusel.y=72
- 		countrei=0
- 		if not burnvil then
- 			hero.life+=1
- 		end
- 		if hero.life>10 then hero.life=10 end
- 		gamestatus="inicio"
- 		if cthrises then cthmove=true end
- 	elseif gamestatus=="tenda" then
-			currentturn+=1
-			hero.x=16
-			hero.y=104
-			optmenu=false		
- 		selopt=1
- 		menusel.y=72
- 		countrei=0
- 		if not burnten then
- 			hero.defense+=1
- 		end
- 		if hero.defense>10 then hero.defense=10 end
- 		gamestatus="inicio"
- 		if cthrises then cthmove=true end
-		end
-	end
-end
--->8
---sounds
-function checkmenusound()
-	if play then sfx(0) end
-	play=false
 end
 __gfx__
 0000000000550000cc0000cc333333333333333333333333ffffffff333333333ffffffffffffff3cccccccc33333333333333333cccccccccccccc33333333c
@@ -639,6 +674,8 @@ __sfx__
 011700200374200000037320000003732000000373200000037320000003732000000373200000037320000001732000000173200000017320000001732000000173200000017320000001732000000173200000
 011e00200e150121500e150121500e150121500e150121500e150141500e150141500e150141500e150141500d150151500d150151500d150151500d150151500b150171500b150191500b1501a1500b1501c150
 011e00201a0501a0501a0501a0501a0501a0501a0501a0501c0501c0501c0501c0501c0501c0501a0501c0501e0501e0501e0501e0501e0501e0501e0501e0502105021050210502105021050210502105021050
+01100000236500c650236500c650236500c650236500c650236500c65000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0110000003752097520f752187521e752257522a75216752087520375200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 03 01034344
 03 04054344
