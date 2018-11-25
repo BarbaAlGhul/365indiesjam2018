@@ -87,6 +87,8 @@ cth.attack=5
 cth.defense=3
 --strings
 menutext={"reino","vila","tenda","cancelar"}
+menucth={"lutar","cancelar"}
+menucombat={"atacar","defender","cultuar cthulhu"}
 intro={"a hora sombria se","aproxima. voce esta","preparado?"}
 intro2={"va para as cidades para","se fortalecer"}
 intro3={"cthulhu esta voltando!","qual sera sua escolha?"}
@@ -105,9 +107,12 @@ play=false
 cthrises=false
 cthmove=false
 menuchoice=false
+menucthchoice=false
 mhero=false
 cthenters=false
 cthmusic=false
+fightcth=false
+stay=true
 --counters
 selopt=1
 currentturn=1
@@ -115,6 +120,7 @@ countrei=0
 countdialogs=0
 countcth=0
 cthstatus=0
+cthslctopt=1
 -->8
 --loop start here
 function _init()
@@ -130,24 +136,29 @@ end
 
 function _draw()
 	cls()
-	map(0,0,0,0,16,16)
-	drawplaces()
-	spr(hero.sprite,hero.x,hero.y)
- print(reino,97,11,0)
-	print(vila,33,58,0)
-	print(tenda,11,98,0)
-	drawsymbols()
-	herostatus()
-	selecthero()
-	spr(pc.sprite,pc.x,pc.y)
- initialdialogs()
- options()
- clickmenu()
- countturn()
- movecthulhu()
- movehero()
+	if not fightcth then
+		map(0,0,0,0,16,16)
+ 	drawplaces()
+ 	spr(hero.sprite,hero.x,hero.y)
+  print(reino,97,11,0)
+ 	print(vila,33,58,0)
+ 	print(tenda,11,98,0)
+ 	drawsymbols()
+ 	herostatus()
+ 	selecthero()
+ 	spr(pc.sprite,pc.x,pc.y)
+  initialdialogs()
+  options()
+  clickmenu()
+  optionscth()
+  clickmenucth()
+  countturn()
+  movecthulhu()
+  movehero()
+	end	
 end
-
+-->8
+--general
 function initialdialogs()
 	if dl then
  	if countdialogs<1 then
@@ -303,6 +314,31 @@ function options()
 	end
 end
 
+function optionscth()
+ if cthrises then
+ 	if stay then
+ 		dl=true
+ 		dialog(menucth,2)
+ 		spr(menusel.sprite,menusel.x,menusel.y)
+ 		menucthchoice=true
+ 		if cthslctopt<1 then cthslctopt=1
+ 		elseif cthslctopt>2 then cthslctopt=2
+ 		else
+ 			if btnp(2) then
+ 			 selopt-=1
+ 			 menusel.y-=8
+ 			 if menusel.y<72 then menusel.y=72 end
+ 			elseif btnp(3) then
+ 			 selopt+=1
+ 			 menusel.y+=8
+ 			 if menusel.y>96 then menusel.y=96 end
+ 			end
+ 		end
+ 		stay=false
+ 	end
+ end
+end
+
 function clickmenu()
 	if menuchoice then
 		if btnp(5) then
@@ -332,6 +368,11 @@ function clickmenu()
   	end
 		end
 		menuchoice=false
+	end
+end
+
+function clickmenucth()
+	if cthrises then
 	end
 end
 
